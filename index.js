@@ -57,13 +57,13 @@ async function getAnalysis(text) {
   }
 }
 
-async function checkRequest(file, analysis) {
+function checkRequest(file, analysis) {
   let userInput = process.argv.slice(2).join(' ');
   if (userInput.endsWith('.txt')) {
-    userInput = await file(userInput);
+    userInput = file(userInput);
   }
 
-  await analysis(userInput);
+  analysis(userInput);
 }
 
 checkRequest(readFile, getAnalysis).catch('');
