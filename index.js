@@ -1,19 +1,37 @@
+import fsPromise from 'node:fs/promises';
 import fetch from 'node-fetch';
 
-async function getAnalysis() {
+async function readFile(fileName) {
   try {
-    const userInput = process.argv.slice(2).join(' ');
-    const options = {
-      method: 'POST',
-      body: 'text=' + userInput,
-      'Content-Type': 'text/plain',
-    };
+    const fileContent = await fsPromise.readFile(
+      fileName,
+      'utf-8',
+      (err, data) => {
+        if (err) {
+          throw new Error();
+        }
+        return data;
+      },
+    );
+    return fileContent;
+  } catch {
+    console.log('Oops something went wrong. Please check if there is a typo!');
+  }
+}
+
+async function getAnalysis(text) {
+  const options = {
+    method: 'POST',
+    body: `text=${text}`,
+  };
+
+  try {
     const response = await fetch(
       'http://text-processing.com/api/sentiment/',
       options,
     );
     if (!response.ok) {
-      throw new Error(response.status);
+      throw new Error();
     }
     const data = await response.json();
     const probabilities = Object.values(data.probability).map((item) =>
@@ -25,23 +43,27 @@ async function getAnalysis() {
       summary = 'Positive';
     } else if (label === 'neg') {
       summary = 'Negative';
-    } else {
+    } else if (label === 'neutral') {
       summary = 'Neutral';
     }
-    // msg to print
-    const msg = `Your text has the following sentiment:
+    const msg = `Your text has following sentiment:
     ${probabilities[0]}% negative
-    ${probabilities[1]}% neutral
-    ${probabilities[2]}% positive
+    ${probabilities[1]}% positive
+    ${probabilities[2]}% neutral
     Overall: ${summary}`;
-
     console.log(msg);
-    console.log(userInput);
   } catch (err) {
-    console.log(
-      `Wou could not analyze your data. Please check for typos. Status code : ${err}`,
-    );
+    console.log('Oops something went wrong. Please check if there is a typo!');
   }
 }
 
-getAnalysis().catch('');
+async function checkRequest(file, analysis) {
+  let userInput = process.argv.slice(2).join(' ');
+  if (userInput.endsWith('.txt')) {
+    userInput = await file(userInput);
+  }
+
+  await analysis(userInput);
+}
+
+checkRequest(readFile, getAnalysis).catch('');
