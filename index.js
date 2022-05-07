@@ -1,18 +1,14 @@
 import fsPromise from 'node:fs/promises';
 import fetch from 'node-fetch';
 
-async function readFile(fileName) {
+function readFile(fileName) {
   try {
-    const fileContent = await fsPromise.readFile(
-      fileName,
-      'utf-8',
-      (err, data) => {
-        if (err) {
-          throw new Error();
-        }
-        return data;
-      },
-    );
+    const fileContent = fsPromise.readFile(fileName, 'utf-8', (err, data) => {
+      if (err) {
+        throw new Error();
+      }
+      return data;
+    });
     return fileContent;
   } catch {
     console.log('Oops something went wrong. Please check if there is a typo!');
@@ -57,13 +53,13 @@ async function getAnalysis(text) {
   }
 }
 
-function checkRequest(file, analysis) {
+async function checkRequest(file, analysis) {
   let userInput = process.argv.slice(2).join(' ');
   if (userInput.endsWith('.txt')) {
-    userInput = file(userInput);
+    userInput = await file(userInput);
   }
 
   analysis(userInput);
 }
 
-checkRequest(readFile, getAnalysis);
+checkRequest(readFile, getAnalysis).catch('');
