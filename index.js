@@ -66,4 +66,4 @@ function checkRequest(file, analysis) {
   analysis(userInput);
 }
 
-checkRequest(readFile, getAnalysis).catch('');
+checkRequest(readFile, getAnalysis);
