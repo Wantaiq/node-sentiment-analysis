@@ -1,14 +1,18 @@
 import fsPromise from 'node:fs/promises';
 import fetch from 'node-fetch';
 
-function readFile(fileName) {
+async function readFile(fileName) {
   try {
-    const fileContent = fsPromise.readFile(fileName, 'utf-8', (err, data) => {
-      if (err) {
-        throw new Error();
-      }
-      return data;
-    });
+    const fileContent = await fsPromise.readFile(
+      fileName,
+      'utf-8',
+      (err, data) => {
+        if (err) {
+          throw new Error();
+        }
+        return data;
+      },
+    );
     return fileContent;
   } catch {
     console.log('Oops something went wrong. Please check if there is a typo!');
